@@ -19,7 +19,8 @@ module.exports = (robot) =>
     today = moment()
 
     url = "http://www.nfl.com/liveupdate/scorestrip/ss.json"
-    msg.http(url).get() (err, res, body) ->
+    #url = "http://www.nfl.com/liveupdate/scores/scores.json" # new url
+    msg.http(url).get() (err, res, body) =>
       return msg.send "Unable to pull today's scoreboard. ERROR:#{err}" if err
       return msg.send "Unable to pull today's scoreboard: #{res.statusCode + ':\n' + body}" if res.statusCode != 200
 
@@ -39,6 +40,7 @@ module.exports = (robot) =>
         # setup
         awayTeamName = game.vnn
         homeTeamName = game.hnn
+        gamekey = game.eid
         # Final scores
         if game.q == 'F' && !team
           emit.push("#{awayTeamName} (#{game.vs}) vs #{homeTeamName} (#{game.hs}) FINAL")
@@ -50,7 +52,20 @@ module.exports = (robot) =>
         # Pre-game settings
         else
           if displayGame(game, team)
-            emit.push("#{awayTeamName} vs #{homeTeamName} #{game.d} #{game.t} EST")
+            msg.send("displayGame was true")
+            game_url = "http://www.nfl.com/liveupdate/game-center/2016081955/2016081955_gtd.json"
+            #game_url = "http://www.nfl.com/liveupdate/game-center/#{gamekey}/#{gamekey}_gtd.json"
+            msg.http().get() (err, res, body) ->
+              gamedata = JSON.parse(body)
+              #msg.send("checking team")
+              emit.push("not team")
+              emit.push("#{awayTeamName} (#{game.vs}) vs #{homeTeamName} (#{game.hs}) #{gamedata.clock} #{gamedata.qtr}")
+              emit.push("#{team} #{game.hnn.toUpperCase()} #{game.vnn.toUpperCase()}")
+                    #continue
+              emit.push("continuing")
+
+#original DO NOT DELETE!
+#            emit.push("#{awayTeamName} vs #{homeTeamName} #{game.d} #{game.t} EST")
 
       if emit.length >= 1
         return msg.send emit.join("\n")
@@ -74,3 +89,12 @@ displayGame = (game, team) ->
     return true
 
   return false
+
+getGameData = (game) ->
+  game_url = "http://www.nfl.com/liveupdate/game-center/2016081955/2016081955_gtd.json"
+  #game_url = "http://www.nfl.com/liveupdate/game-center/#{gamekey}/#{gamekey}_gtd.json"
+  msg.http().get() (err, res, body) ->
+    return gamedata = JSON.parse(body)
+    # msg.send "got back #{gamedata['2016081955']}"
+    # for key, value of gamedata['2016081955']
+    #   msg.send("gd key: #{key} value: #{value}")
