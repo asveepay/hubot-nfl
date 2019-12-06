@@ -23,8 +23,7 @@ module.exports = (robot) =>
       return msg.send "Unable to pull today's scoreboard. ERROR:#{err}" if err
       return msg.send "Unable to pull today's scoreboard: #{res.statusCode + ':\n' + body}" if res.statusCode != 200
 
-      gameday = JSON.parse(body)
-      games = gameday.gms
+      games = JSON.parse(body).gms
 
       games.sort (a, b) ->
         if a.q == 'F'
@@ -40,12 +39,12 @@ module.exports = (robot) =>
         awayTeamName = game.vnn
         homeTeamName = game.hnn
         # Final scores
-        if game.q == 'F' && !team
-          emit.push("#{awayTeamName} (#{game.vs}) vs #{homeTeamName} (#{game.hs}) FINAL")
+        if game.q == 'F'
+          emit.push("#{awayTeamName} #{game.vs} vs #{homeTeamName} #{game.hs} FINAL")
 
         # In-progress games
         else if game.q != 'P'
-          emit.push("getting game data for #{game_url}")
+          emit.push("#{awayTeamName} #{game.vs} @ #{homeTeamName} #{game.hs} Q: #{game.q}")
 
         # Pre-game settings
         else
