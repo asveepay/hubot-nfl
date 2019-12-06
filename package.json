@@ -1,6 +1,6 @@
 {
   "name": "hubot-nfl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Roland Cooper <asveepay@gmail.com>",
   "description": "A Hubot plugin for pulling in this week's NFL games (and scores).",
   "keywords": [
