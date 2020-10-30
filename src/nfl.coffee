@@ -3,6 +3,7 @@
 #
 # Dependencies:
 #   "moment": "^2.6.0"
+#   "axios":
 #
 # Commands:
 #   hubot football - Pulls this week's games
@@ -12,13 +13,31 @@
 #   asveepay
 
 moment = require 'moment'
+axio = require 'axios'
 
 module.exports = (robot) =>
   robot.respond /football( (.*))?/i, (msg) ->
     team = if msg.match[1] then msg.match[1].toUpperCase().trim() else false
     today = moment()
+    api_url = "https://api.nfl.com/v3/shield"
+    token_url = "https://api.nfl.com/v1/reroute&grant_type=client_credentials"
+    COMMON_HEADERS = {
+      "Origin" => "https://www.nfl.com",
+      "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:78.0) Gecko/20100101 Firefox/78.0",
+      "Accept" => "*/*",
+      "Accept-Language" => "en-US,en;q=0.5",
+      "Connection" => "keep-alive",
+      "TE" => "Trailers"
+    }
+    GET_TOKEN_HEADERS = {
+      "Referer" => "https://www.nfl.com/scores/2020/REG1",
+      "Content-Type" => "application/x-www-form-urlencoded",
+      "X-Domain-Id" => "100",
+      "Origin" => "https://www.nfl.com",
+    }
+    token = getAuthToken(token_url, {...GET_TOKEN_HEADERS, ...COMMON_HEADERS})
 
-    url = "http://www.nfl.com/liveupdate/scorestrip/ss.json"
+
     msg.http(url).get() (err, res, body) ->
       return msg.send "Unable to pull today's scoreboard. ERROR:#{err}" if err
       return msg.send "Unable to pull today's scoreboard: #{res.statusCode + ':\n' + body}" if res.statusCode != 200
@@ -73,3 +92,21 @@ displayGame = (game, team) ->
     return true
 
   return false
+
+getAuthToken = (url, headers) ->
+  axios.post(
+    url: url,
+    {},
+    headers: headers
+  ).then((response) => {
+    console.log(JSON.parse(response)['auth_token'])
+  }).catch()
+
+fetchGameData = (url, headers) ->
+  axios.get(
+    url: url,
+    {}
+    headers: headers
+  ).then((response) => {
+    console.log(JSON.parse(response))
+  })

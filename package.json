@@ -18,5 +18,8 @@
   "main": "index.coffee",
   "dependencies": {
     "moment": "^2.6.0"
+  },
+  "devDependencies": {
+    "axios": "^0.19.2"
   }
 }
